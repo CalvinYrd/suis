@@ -23,7 +23,7 @@ def menu(choices, title="", previousChoices=[]):
 		if (len(choice) > tallestLength):
 			tallestLength = len(choice)
 
-	while output.lower().strip() != "ok":
+	while 'ok' not in output.lower().strip():
 		for selection in choices:
 			if not selection:
 				continue
@@ -67,7 +67,7 @@ def menu(choices, title="", previousChoices=[]):
 						print()
 
 			output = input("\n> ")
-			if output.lower().strip() == "ok" and selection:
+			if 'ok' in output.lower().strip() and selection:
 				if os.name == "nt":
 					os.system('title "Suis 0.0.1 | By CalvinYrd"')
 
