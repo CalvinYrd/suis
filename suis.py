@@ -1,6 +1,12 @@
 import os, colorama, sys
 
-clear = lambda: [os.system("cls") if os.name == "nt" else os.system("clear")]
+if os.name == 'nt':
+	def clear():
+		os.system('cls')
+
+else:
+	def clear():
+		os.system('clear')
 
 clear()
 
@@ -127,28 +133,35 @@ homeTitle = """ ____ ____ ____ ____ _________ ____ ____ ____ ____ ____
       |__/                                      
 ------------------------------------------------------"""
 
-menuAccueil = menu(["Interpreter", "Traduire", "Afficher le clavier", "Notice d'utilisation"], homeTitle)
+menuAccueil = ""
+while menuAccueil.lower() != "quitter":
+	menuAccueil = menu(["Interpreter", "Traduire", "Afficher le clavier", "Notice d'utilisation"], homeTitle)
 
-if menuAccueil == "Interpreter":
-	pass
+	if menuAccueil.lower() == "interpreter":
+		pass
 
-elif menuAccueil == "Traduire":
-	pass
+	elif menuAccueil.lower() == "traduire":
+		pass
 
-elif menuAccueil == "Afficher le clavier":
-	menuClavier = menu(["Afficher les caractères en minuscule", "Afficher les caractères en majuscule", "Afficher les caractères en altgr"], homeTitle, [menuAccueil])
+	elif menuAccueil.lower() == "afficher le clavier":
+		menuClavier = ""
+		while "retour" not in menuClavier.lower():
+			menuClavier = menu(["Afficher les caractères en minuscule", "Afficher les caractères en majuscule", "Afficher les caractères en altgr"], homeTitle, [menuAccueil])
 
-	if menuClavier == "Afficher les caractères en minuscule":
-		charsType = 'lower'
+			if menuClavier.lower() == "afficher les caractères en minuscule":
+				charsType = 'lower'
 
-	elif menuClavier == "Afficher les caractères en majuscule":
-		charsType = 'upper'
+			elif menuClavier.lower() == "afficher les caractères en majuscule":
+				charsType = 'upper'
 
-	elif menuClavier == "Afficher les caractères en altgr":
-		charsType = 'altgr'
+			elif menuClavier.lower() == "afficher les caractères en altgr":
+				charsType = 'altgr'
 
-	if "Afficher les caractères en" in menuClavier:
-		menu([], f"""   ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ 
+			elif menuClavier.lower() == "quitter":
+				sys.exit(0)
+
+			if "Afficher les caractères en" in menuClavier:
+				menuClavierAffichage = menu([], f"""   ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ 
   ||{[[chars[charsType][2][1] if 1 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][2] if 2 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][3] if 3 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][4] if 4 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][5] if 5 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][6] if 6 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][7] if 7 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][8] if 8 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][9] if 9 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][10] if 10 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][11] if 11 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][12] if 12 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][13] if 13 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} ||
 2 ||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__||
   |/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
@@ -169,5 +182,8 @@ elif menuAccueil == "Afficher le clavier":
 6 ||__|||__|||__|||_____________________________________|||__|||__|||__||
   |/__\|/__\|/__\|/_____________________________________\|/__\|/__\|/__\|""", [menuAccueil, menuClavier])
 
-elif menuAccueil == "Notice d'utilisation":
-	pass
+				if menuClavierAffichage.lower() == "quitter":
+					sys.exit(0)
+
+	elif menuAccueil.lower() == "notice d'utilisation":
+		pass
