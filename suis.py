@@ -1,4 +1,5 @@
-import os, colorama, sys
+from tkinter import filedialog
+import os, colorama, sys, shutil
 
 if os.name == 'nt':
 	def clear():
@@ -83,6 +84,9 @@ def menu(choices, title="", previousChoices=[]):
 
 				return selection
 
+def convertCode(language, lines):
+	return lines
+
 chars = {
 	"lower" : {
 		2 : {
@@ -135,13 +139,69 @@ homeTitle = """ ____ ____ ____ ____ _________ ____ ____ ____ ____ ____
 
 menuAccueil = ""
 while menuAccueil.lower() != "quitter":
-	menuAccueil = menu(["Interpreter", "Traduire", "Afficher le clavier", "Notice d'utilisation"], homeTitle)
+	menuAccueil = menu(["Interpreter", "Convertir", "Afficher le clavier", "Notice d'utilisation"], homeTitle)
 
 	if menuAccueil.lower() == "interpreter":
-		pass
+		menuInterprete = ""
+		while "retour" not in menuInterprete.lower():
+			menuInterprete = menu(["Interpreter un fichier", "Interpreter un dossier (seuls les fichiers à l'origine du dossiers seront convertis en langage suis)"], homeTitle, [menuAccueil])
 
-	elif menuAccueil.lower() == "traduire":
+			if menuInterprete.lower() == "quitter":
+				sys.exit(0)
+
+			elif "interpreter un fichier" in menuInterprete.lower():
+				path = filedialog.askopenfile(filetypes = (("Fichiers suis", "*.suis"), ("Tous les fichiers", "*.*")))
+
+				if path and path.name.endswith(".suis"):
+					path = path.name
+
+					with open(path, "r", encoding = "utf-8") as sourceFile:
+						with open("__exectempfile__.py", "w", encoding = "utf-8") as targetFile:
+							input(convertCode("python", sourceFile.readlines()))
+
+					os.remove("__exectempfile__.py")
+
+					# execution
+
+			elif "interpreter un dossier" in menuInterprete.lower():
+				path = filedialog.askdirectory()
+
+				if path:
+					files = []
+
+					for file in os.listdir(path):
+						if os.path.isfile(os.path.join(path, file)):
+							files.append(file)
+
+					if os.path.exists("__exectempdir__") and os.path.isdir("__exectempdir__"):
+						shutil.rmtree("__exectempdir__")
+
+					shutil.copytree(path, "__exectempdir__")
+
+					for file in files:
+						if file.endswith(".suis"):
+							os.rename(f"__exectempdir__/{file}", f"__exectempdir__/{file.replace('.suis', '.py')}")
+
+							with open(f"{path}/{file}", 'r', encoding = "utf-8") as sourceFile:
+								with open(f"__exectempdir__/{file.replace('.suis', '.py')}", "w", encoding = "utf-8") as targetFile:
+									input(convertCode("python", sourceFile.readlines()))
+
+					# menu pour choisir le fichier (que les .suis)
+
+					shutil.rmtree("__exectempdir__")
+
+					# execution
+
+	elif menuAccueil.lower() == "convertir":
 		pass
+		# convertir en suis
+		# convertir en python
+			# convertir un fichier
+			# convertir un dossier
+			# convertir en direct
+				# afficher
+				# enregistrer
+				# afficher et enregistrer
 
 	elif menuAccueil.lower() == "afficher le clavier":
 		menuClavier = ""
