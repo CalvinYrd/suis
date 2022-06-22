@@ -1,6 +1,10 @@
 from tkinter import filedialog
 import os, colorama, sys, shutil
 
+class UnknownCharacterError(Exception):
+	def __init__(self, character, line, _set, file):
+		super().__init__(f"The \"{character}\" character is not allowed to be used in this context at line {str(line)} on set n°{str(_set)} in {file}, you can only use these three characters : {'}'} , ¤ , ~. Except you are writing a comment, in which case you can use any character.")
+
 if os.name == 'nt':
 	def clear():
 		os.system('cls')
@@ -85,7 +89,13 @@ def menu(choices, title="", previousChoices=[]):
 				return selection
 
 def convertCode(language, lines):
-	return lines
+	newLines = []
+
+	for line in lines:
+		if language == "python":
+			newLines.append(line.split("~~"))
+
+	return newLines
 
 chars = {
 	"lower" : {
@@ -134,7 +144,7 @@ homeTitle = """ ____ ____ ____ ____ _________ ____ ____ ____ ____ ____
  | _ }_  _   / __|__ _| |_ _{_}_ \ \ / / _ __| |
  | _ \ || | | {__/ _` | \ V / | ' \ V / '_/ _` |
  |___/\_, |  \___\__,_|_|\_/|_|_||_|_||_| \__,_|
-      |__/                                      
+	  |__/                                      
 ------------------------------------------------------"""
 
 menuAccueil = ""
