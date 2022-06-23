@@ -1,9 +1,13 @@
 from tkinter import filedialog
-import os, colorama, sys, shutil
+import os, colorama, sys, shutil, string, msvcrt
+
+class UnauthorizedSymbolError(Exception):
+	def __init__(self, character, line, _set, file):
+		super().__init__(f"The \"{character}\" character is not allowed to be used in this context at line {str(line)} on set n°{str(_set['iteration'])} containing \"{_set['value']}\" in file : {file}, you can only use these three characters : {'}'} , ¤ , ~. Except you are writing a comment, in which case you can use any character.")
 
 class UnknownCharacterError(Exception):
-	def __init__(self, character, line, _set, file):
-		super().__init__(f"The \"{character}\" character is not allowed to be used in this context at line {str(line)} on set n°{str(_set)} in {file}, you can only use these three characters : {'}'} , ¤ , ~. Except you are writing a comment, in which case you can use any character.")
+	def __init__(self, y, x, type, line, _set, file):
+		super().__init__(f"There is no character at position {y}:{x} of type \"{type}\" at line {str(line)} on set n°{str(_set['iteration'])} containing \"{_set['value']}\" in file : {file}. Please check the keyboard on the home menu.")
 
 if os.name == 'nt':
 	def clear():
@@ -15,7 +19,7 @@ else:
 
 clear()
 
-def menu(choices, title="", previousChoices=[]):
+def menu(choices = [], title="", previousChoices=[]):
 	if title:
 		title = f'\n{title}\n{colorama.Fore.GREEN}\nFaites <Entrer> pour naviguer entre les différentes options.\nFaites "ok" pour confirmer votre choix.{colorama.Fore.BLACK}\n'
 
@@ -91,9 +95,119 @@ def menu(choices, title="", previousChoices=[]):
 def convertCode(language, lines):
 	newLines = []
 
-	for line in lines:
+	for lineIndex in range(len(lines)):
 		if language == "python":
-			newLines.append(line.split("~~"))
+
+			newLine = ''
+			if lines[lineIndex]:
+				decomposedLine = {"instruction" : None, "comment" : None}
+
+				if len(lines[lineIndex][::-1].replace('~~', 'afl855dh2qlhh12g15dg145d7'[::-1], 1)[::-1].split('afl855dh2qlhh12g15dg145d7')) == 2:
+
+					commentExists = lines[lineIndex]
+					for c in string.printable.replace('}', '').replace('¤', '').replace('~', ''):
+						commentExists = commentExists.replace(c, '')
+
+					if commentExists.endswith('~~~'):
+						decomposedLine['instruction'] = lines[lineIndex][::-1].replace('~~', 'afl855dh2qlhh12g15dg145d7'[::-1], 1)[::-1].split('afl855dh2qlhh12g15dg145d7')[0]
+						decomposedLine['comment'] = lines[lineIndex][::-1].replace('~~', 'afl855dh2qlhh12g15dg145d7'[::-1], 1)[::-1].split('afl855dh2qlhh12g15dg145d7')[1]
+
+					else:
+						decomposedLine['instruction'] = lines[lineIndex]
+						decomposedLine['comment'] = None
+
+				else:
+					decomposedLine['instruction'] = lines[lineIndex]
+					decomposedLine['comment'] = None
+
+				charsVerifier = [i for i in lines[lineIndex][::-1].replace('~~', 'afl855dh2qlhh12g15dg145d7'[::-1], 1)[::-1].split('afl855dh2qlhh12g15dg145d7')[0].split('~') if i and i != '¤']
+
+				for char in string.printable.replace('}', '').replace('¤', '').replace('~', ''):
+					for charToVerifyIndex in range(len(charsVerifier)):
+						if char in charsVerifier[charToVerifyIndex]:
+							raise UnauthorizedSymbolError(char, lineIndex + 1, {'iteration' : charToVerifyIndex + 1, 'value' : charsVerifier[charToVerifyIndex]}, '!!! FILE NAME IN CONTEXT !!!')
+
+				characters = decomposedLine['instruction'].split('~')[:-1]
+				currentSetIteration = 0
+
+				for characterIndex in range(len(characters)):
+					if '}' in characters[characterIndex] and '¤' in characters[characterIndex]:
+
+						currentSetIteration += 1
+						characterDecomposition, characterSchema = characters[characterIndex].split('¤'), []
+						characterSchema.append(len(characterDecomposition[0]))
+						baseIndex = None
+
+						if len(characterDecomposition) > 2 and not characterDecomposition[2]:
+							characterSchema.append(len(characterDecomposition[1]) * 10 + len(characterDecomposition[3]))
+
+							if (len(characterDecomposition) > 4):
+								baseIndex = 4
+
+						else:
+							characterSchema.append(len(characterDecomposition[1]))
+
+							if (len(characterDecomposition) > 2):
+								baseIndex = 2
+
+						if baseIndex:
+							multiplier = 0
+
+							for i in range(len(characterDecomposition) - baseIndex):
+
+								if characterDecomposition[baseIndex]:
+									multiplier += int(str(len(characterDecomposition[baseIndex])) + int((((len(characterDecomposition) - baseIndex) - 1) / 2)) * '0')
+
+									baseIndex += 1
+
+								elif not characterDecomposition[baseIndex] and not characterDecomposition[baseIndex - 1]:
+									baseIndex += 1
+
+								else:
+									baseIndex += 1
+									continue
+
+							characterSchema.append(multiplier)
+
+						else:
+							characterSchema.append(1)
+
+						try:
+							if characters[characterIndex + 1] == '¤':
+								try:
+									newLine += characterSchema[2] * chars['altgr'][characterSchema[0]][characterSchema[1]]
+
+								except KeyError:
+									raise UnknownCharacterError(characterSchema[0], characterSchema[1], 'altgr', lineIndex + 1, {'iteration' : currentSetIteration, 'value' : characters[characterIndex]}, '!!! FILE NAME IN CONTEXT !!!')
+
+							elif not characters[characterIndex + 1]:
+								try:
+									newLine += characterSchema[2] * chars['upper'][characterSchema[0]][characterSchema[1]]
+
+								except KeyError:
+									raise UnknownCharacterError(characterSchema[0], characterSchema[1], 'upper', lineIndex + 1, {'iteration' : currentSetIteration, 'value' : characters[characterIndex]}, '!!! FILE NAME IN CONTEXT !!!')
+
+							else:
+								try:
+									newLine += characterSchema[2] * chars['lower'][characterSchema[0]][characterSchema[1]]
+
+								except KeyError:
+									raise UnknownCharacterError(characterSchema[0], characterSchema[1], 'lower', lineIndex + 1, {'iteration' : currentSetIteration, 'value' : characters[characterIndex]}, '!!! FILE NAME IN CONTEXT !!!')
+
+						except IndexError:
+							try:
+								newLine += characterSchema[2] * chars['lower'][characterSchema[0]][characterSchema[1]]
+							
+							except KeyError:
+								raise UnknownCharacterError(characterSchema[0], characterSchema[1], 'lower', lineIndex + 1, {'iteration' : characterIndex + 1, 'value' : characters[characterIndex]}, '!!! FILE NAME IN CONTEXT !!!')
+
+				if decomposedLine['comment']:
+					newLine += f" #{decomposedLine['comment']}"
+
+			else:
+				newLine += '\n'
+
+			newLines.append(newLine)
 
 	return newLines
 
@@ -154,7 +268,7 @@ while menuAccueil.lower() != "quitter":
 	if menuAccueil.lower() == "interpreter":
 		menuInterprete = ""
 		while "retour" not in menuInterprete.lower():
-			menuInterprete = menu(["Interpreter un fichier", "Interpreter un dossier (seuls les fichiers à l'origine du dossiers seront convertis en langage suis)"], homeTitle, [menuAccueil])
+			menuInterprete = menu(["Interpreter un fichier", "Interpreter un dossier (seuls les fichiers à l'origine du dossiers seront convertis en langage suis)", "Interpreter en temps-réel"], homeTitle, [menuAccueil])
 
 			if menuInterprete.lower() == "quitter":
 				sys.exit(0)
@@ -167,11 +281,14 @@ while menuAccueil.lower() != "quitter":
 
 					with open(path, "r", encoding = "utf-8") as sourceFile:
 						with open("__exectempfile__.py", "w", encoding = "utf-8") as targetFile:
-							input(convertCode("python", sourceFile.readlines()))
+							for line in convertCode("python", sourceFile.readlines()):
+								targetFile.write(line)
 
+					clear()
+					os.system('py __exectempfile__.py')
 					os.remove("__exectempfile__.py")
-
-					# execution
+					print(f'\n### Appuyez sur une touche pour continuer ###')
+					msvcrt.getch()
 
 			elif "interpreter un dossier" in menuInterprete.lower():
 				path = filedialog.askdirectory()
