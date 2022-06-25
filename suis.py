@@ -1,5 +1,5 @@
 from tkinter import filedialog
-import os, colorama, sys, shutil, string, msvcrt
+import os, colorama, sys, shutil, string, msvcrt, pynput, threading, time
 
 class UnauthorizedSymbolError(Exception):
 	def __init__(self, character, line, _set, file):
@@ -211,166 +211,212 @@ def convertCode(language, lines):
 
 	return newLines
 
-chars = {
-	"lower" : {
-		2 : {
-			1 : "²", 2 : "&", 3 : "é", 4 : '"', 5 : "'", 6 : "(", 7 : "-", 8 : "è", 9 : "_", 10 : "ç", 11 : "à", 12 : ")", 13 : "="
-		},
-		3 : {
-			1 : "\t", 2 : "a", 3 : "z", 4 : "e", 5 : "r", 6 : "t", 7 : "y", 8 : "u", 9 : "i", 10 : "o", 11 : "p", 12 : "^", 13 : "$"
-		},
-		4 : {
-			2 : "q", 3 : "s", 4 : "d", 5 : "f", 6 : "g", 7 : "h", 8 : "j", 9 : "k", 10 : "l", 11 : "m", 12 : "ù", 13 : "*"
-		},
-		5 : {
-			2 : "<", 3 : "w", 4 : "x", 5 : "c", 6 : "v", 7 : "b", 8 : "n", 9 : ",", 10 : ";", 11 : ":", 12 : "!"
-		},
-		6 : {4 : " "}
-	},
-	"upper" : {
-		2 : {
-			2 : "1", 3 : "2", 4 : '3', 5 : "4", 6 : "5", 7 : "6", 8 : "7", 9 : "8", 10 : "9", 11 : "0", 12 : "°", 13 : "+"
-		},
-		3 : {
-			2 : "A", 3 : "Z", 4 : "E", 5 : "R", 6 : "T", 7 : "Y", 8 : "U", 9 : "I", 10 : "O", 11 : "P", 12 : "¨", 13 : "£"
-		},
-		4 : {
-			2 : "Q", 3 : "S", 4 : "D", 5 : "F", 6 : "G", 7 : "H", 8 : "J", 9 : "K", 10 : "L", 11 : "M", 12 : "%", 13 : "µ"
-		},
-		5 : {
-			2 : ">", 3 : "W", 4 : "X", 5 : "C", 6 : "V", 7 : "B", 8 : "N", 9 : "?", 10 : ".", 11 : "/", 12 : "§"
-		}
-	},
-	"altgr" : {
-		2 : {
-			3 : "~", 4 : "#", 5 : "{", 6 : "[", 7 : "|", 8 : "`", 9 : "\\", 10 : "^", 11 : "@", 12 : "]", 13 : "}"
-		},
-		3 : {4 : "€", 13 : "¤"}
-	}
-}
+def launchPythonInterpreter():
+	os.system('py')
 
-homeTitle = """ ____ ____ ____ ____ _________ ____ ____ ____ ____ ____ 
+def printSuisDetails():
+	print("Suis 0.0.1\nWrite an empty line to quit.\n>>> ")
+
+def interpretSuis():
+	output = '.'
+	pynput.keyboard.Controller().press(pynput.keyboard.Key.enter)
+	while output.strip():
+		output = input()
+		pynput.keyboard.Controller().type(convertCode('python', [output])[0])
+		time.sleep(0.3)
+		pynput.keyboard.Controller().press(pynput.keyboard.Key.enter)
+
+	pynput.keyboard.Controller().type("import sys; sys.exit(0)")
+	pynput.keyboard.Controller().press(pynput.keyboard.Key.enter)
+
+def exit():
+	print(colorama.Style.RESET_ALL)
+	clear()
+	sys.exit(0)
+
+try:
+	chars = {
+		"lower" : {
+			2 : {
+				1 : "²", 2 : "&", 3 : "é", 4 : '"', 5 : "'", 6 : "(", 7 : "-", 8 : "è", 9 : "_", 10 : "ç", 11 : "à", 12 : ")", 13 : "="
+			},
+			3 : {
+				1 : "\t", 2 : "a", 3 : "z", 4 : "e", 5 : "r", 6 : "t", 7 : "y", 8 : "u", 9 : "i", 10 : "o", 11 : "p", 12 : "^", 13 : "$"
+			},
+			4 : {
+				2 : "q", 3 : "s", 4 : "d", 5 : "f", 6 : "g", 7 : "h", 8 : "j", 9 : "k", 10 : "l", 11 : "m", 12 : "ù", 13 : "*"
+			},
+			5 : {
+				2 : "<", 3 : "w", 4 : "x", 5 : "c", 6 : "v", 7 : "b", 8 : "n", 9 : ",", 10 : ";", 11 : ":", 12 : "!"
+			},
+			6 : {4 : " "}
+		},
+		"upper" : {
+			2 : {
+				2 : "1", 3 : "2", 4 : '3', 5 : "4", 6 : "5", 7 : "6", 8 : "7", 9 : "8", 10 : "9", 11 : "0", 12 : "°", 13 : "+"
+			},
+			3 : {
+				2 : "A", 3 : "Z", 4 : "E", 5 : "R", 6 : "T", 7 : "Y", 8 : "U", 9 : "I", 10 : "O", 11 : "P", 12 : "¨", 13 : "£"
+			},
+			4 : {
+				2 : "Q", 3 : "S", 4 : "D", 5 : "F", 6 : "G", 7 : "H", 8 : "J", 9 : "K", 10 : "L", 11 : "M", 12 : "%", 13 : "µ"
+			},
+			5 : {
+				2 : ">", 3 : "W", 4 : "X", 5 : "C", 6 : "V", 7 : "B", 8 : "N", 9 : "?", 10 : ".", 11 : "/", 12 : "§"
+			}
+		},
+		"altgr" : {
+			2 : {
+				3 : "~", 4 : "#", 5 : "{", 6 : "[", 7 : "|", 8 : "`", 9 : "\\", 10 : "^", 11 : "@", 12 : "]", 13 : "}"
+			},
+			3 : {4 : "€", 13 : "¤"}
+		}
+	}
+
+	homeTitle = """ ____ ____ ____ ____ _________ ____ ____ ____ ____ ____ 
 ||S |||U |||I |||S |||       |||0 |||. |||0 |||. |||1 ||
 ||__|||__|||__|||__|||_______|||__|||__|||__|||__|||__||
 |/__\|/__\|/__\|/__\|/_______\|/__\|/__\|/__\|/__\|/__\|
 ------------------------------------------------------
-  ___         ___      _     _   __   __      _ 
- | _ }_  _   / __|__ _| |_ _{_}_ \ \ / / _ __| |
- | _ \ || | | {__/ _` | \ V / | ' \ V / '_/ _` |
- |___/\_, |  \___\__,_|_|\_/|_|_||_|_||_| \__,_|
-	  |__/                                      
-------------------------------------------------------"""
+ ___         ___      _     _   __   __      _ 
+| _ }_  _   / __|__ _| |_ _{_}_ \ \ / / _ __| |
+| _ \ || | | {__/ _` | \ V / | ' \ V / '_/ _` |
+|___/\_, |  \___\__,_|_|\_/|_|_||_|_||_| \__,_|
+      |__/                                      
+	------------------------------------------------------"""
 
-menuAccueil = ""
-while menuAccueil.lower() != "quitter":
-	menuAccueil = menu(["Interpreter", "Convertir", "Afficher le clavier", "Notice d'utilisation"], homeTitle)
+	menuAccueil = ""
+	while menuAccueil.lower() != "quitter":
+		menuAccueil = menu(["Interpreter", "Convertir", "Afficher le clavier", "Notice d'utilisation"], homeTitle)
 
-	if menuAccueil.lower() == "interpreter":
-		menuInterprete = ""
-		while "retour" not in menuInterprete.lower():
-			menuInterprete = menu(["Interpreter un fichier", "Interpreter un dossier (seuls les fichiers à l'origine du dossiers seront convertis en langage suis)", "Interpreter en temps-réel"], homeTitle, [menuAccueil])
+		if menuAccueil.lower() == "interpreter":
+			menuInterprete = ""
+			while "retour" not in menuInterprete.lower():
+				menuInterprete = menu(["Interpreter un fichier", "Interpreter un dossier (seuls les fichiers à l'origine du dossiers seront convertis en langage suis)", "Interpreter en temps-réel"], homeTitle, [menuAccueil])
 
-			if menuInterprete.lower() == "quitter":
-				sys.exit(0)
+				if menuInterprete.lower() == "quitter":
+					exit()
 
-			elif "interpreter un fichier" in menuInterprete.lower():
-				path = filedialog.askopenfile(filetypes = (("Fichiers suis", "*.suis"), ("Tous les fichiers", "*.*")))
+				elif "interpreter un fichier" in menuInterprete.lower():
+					path = filedialog.askopenfile(filetypes = (("Fichiers suis", "*.suis"), ("Tous les fichiers", "*.*")))
 
-				if path and path.name.endswith(".suis"):
-					path = path.name
+					if path and path.name.endswith(".suis"):
+						path = path.name
 
-					with open(path, "r", encoding = "utf-8") as sourceFile:
-						with open("__exectempfile__.py", "w", encoding = "utf-8") as targetFile:
-							for line in convertCode("python", sourceFile.readlines()):
-								targetFile.write(line)
+						with open(path, "r", encoding = "utf-8") as sourceFile:
+							with open("__exectempfile__.py", "w", encoding = "utf-8") as targetFile:
+								for line in convertCode("python", sourceFile.readlines()):
+									targetFile.write(line)
 
-					clear()
-					os.system('py __exectempfile__.py')
-					os.remove("__exectempfile__.py")
-					print(f'\n### Appuyez sur une touche pour continuer ###')
-					msvcrt.getch()
+						clear()
+						os.system('py __exectempfile__.py')
+						os.remove("__exectempfile__.py")
+						print(f'\n### Appuyez sur une touche pour continuer ###')
+						msvcrt.getch()
 
-			elif "interpreter un dossier" in menuInterprete.lower():
-				path = filedialog.askdirectory()
+				elif "interpreter un dossier" in menuInterprete.lower():
+					path = filedialog.askdirectory()
 
-				if path:
-					files = []
+					if path:
+						files = []
 
-					for file in os.listdir(path):
-						if os.path.isfile(os.path.join(path, file)):
-							files.append(file)
+						for file in os.listdir(path):
+							if os.path.isfile(os.path.join(path, file)):
+								files.append(file)
 
-					if os.path.exists("__exectempdir__") and os.path.isdir("__exectempdir__"):
-						shutil.rmtree("__exectempdir__")
+						if os.path.exists("__exectempdir__") and os.path.isdir("__exectempdir__"):
+							shutil.rmtree("__exectempdir__")
 
-					shutil.copytree(path, "__exectempdir__")
+						shutil.copytree(path, "__exectempdir__")
 
-					for file in files:
-						if file.endswith(".suis"):
-							os.rename(f"__exectempdir__/{file}", f"__exectempdir__/{file.replace('.suis', '.py')}")
+						for file in files:
+							if file.endswith(".suis"):
+								os.rename(f"__exectempdir__/{file}", f"__exectempdir__/{file.replace('.suis', '.py')}")
 
-							with open(f"{path}/{file}", 'r', encoding = "utf-8") as sourceFile:
-								with open(f"__exectempdir__/{file.replace('.suis', '.py')}", "w", encoding = "utf-8") as targetFile:
-									input(convertCode("python", sourceFile.readlines()))
+								with open(f"{path}/{file}", 'r', encoding = "utf-8") as sourceFile:
+									with open(f"__exectempdir__/{file.replace('.suis', '.py')}", "w", encoding = "utf-8") as targetFile:
+										targetFile.writelines(convertCode("python", sourceFile.readlines()))
 
-					# menu pour choisir le fichier (que les .suis)
+						menuInterpreteDossier = menu([i for i in os.listdir("__exectempdir__") if i.endswith(".py")], homeTitle, [menuAccueil, menuInterprete])
 
-					shutil.rmtree("__exectempdir__")
+						if menuInterpreteDossier.lower() == 'quitter':
+							shutil.rmtree("__exectempdir__")
+							exit()
 
-					# execution
+						elif "retourner vers : " not in menuInterpreteDossier.lower():
+							clear()
+							os.system(f"py __exectempdir__/{menuInterpreteDossier}")
+							shutil.rmtree("__exectempdir__")
+							print(f'\n### Appuyez sur une touche pour continuer ###')
+							msvcrt.getch()
 
-	elif menuAccueil.lower() == "convertir":
-		pass
-		# convertir en suis
-		# convertir en python
-			# convertir un fichier
-			# convertir un dossier
-			# convertir en direct
-				# afficher
-				# enregistrer
-				# afficher et enregistrer
+						else:
+							shutil.rmtree("__exectempdir__")
 
-	elif menuAccueil.lower() == "afficher le clavier":
-		menuClavier = ""
-		while "retour" not in menuClavier.lower():
-			menuClavier = menu(["Afficher les caractères en minuscule", "Afficher les caractères en majuscule", "Afficher les caractères en altgr"], homeTitle, [menuAccueil])
+				elif "interpreter en temps" in menuInterprete.lower():
 
-			if menuClavier.lower() == "afficher les caractères en minuscule":
-				charsType = 'lower'
+					threading.Thread(target = launchPythonInterpreter).start()
+					time.sleep(0.2)
+					threading.Thread(target = clear).start()
+					time.sleep(0.2)
+					threading.Thread(target = printSuisDetails).start()
+					interpretSuis()
 
-			elif menuClavier.lower() == "afficher les caractères en majuscule":
-				charsType = 'upper'
+		elif menuAccueil.lower() == "convertir":
+			pass
+			# convertir en suis
+			# convertir en python
+				# convertir un fichier
+				# convertir un dossier
+				# convertir en direct
+					# afficher
+					# enregistrer
+					# afficher et enregistrer
 
-			elif menuClavier.lower() == "afficher les caractères en altgr":
-				charsType = 'altgr'
+		elif menuAccueil.lower() == "afficher le clavier":
+			menuClavier = ""
+			while "retour" not in menuClavier.lower():
+				menuClavier = menu(["Afficher les caractères en minuscule", "Afficher les caractères en majuscule", "Afficher les caractères en altgr"], homeTitle, [menuAccueil])
 
-			elif menuClavier.lower() == "quitter":
-				sys.exit(0)
+				if menuClavier.lower() == "afficher les caractères en minuscule":
+					charsType = 'lower'
 
-			if "Afficher les caractères en" in menuClavier:
-				menuClavierAffichage = menu([], f"""   ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ 
-  ||{[[chars[charsType][2][1] if 1 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][2] if 2 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][3] if 3 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][4] if 4 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][5] if 5 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][6] if 6 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][7] if 7 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][8] if 8 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][9] if 9 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][10] if 10 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][11] if 11 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][12] if 12 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][13] if 13 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} ||
-2 ||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__||
-  |/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
-   _______ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____
-  ||{[['tab' if 1 in chars[charsType][3].keys() else '   '][0] if 3 in chars[charsType].keys() else '   '][0]}  |||{[[chars[charsType][3][2] if 2 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][3] if 3 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][4] if 4 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][5] if 5 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][6] if 6 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][7] if 7 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][8] if 8 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][9] if 9 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][10] if 10 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][11] if 11 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][12] if 12 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][13] if 13 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} ||
-3 ||_____|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__||
-  |/_____\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
-   _________ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____
-  ||       |||{[[chars[charsType][4][2] if 2 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][3] if 3 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][4] if 4 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][5] if 5 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][6] if 6 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][7] if 7 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][8] if 8 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][9] if 9 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][10] if 10 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][11] if 11 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][12] if 12 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][13] if 13 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} ||
-4 ||_______|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__||
-  |/_______\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
-   ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ______________ 
-  ||  |||{[[chars[charsType][5][2] if 2 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][3] if 3 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][4] if 4 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][5] if 5 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][6] if 6 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][7] if 7 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][8] if 8 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][9] if 9 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][10] if 10 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][11] if 11 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][12] if 12 in chars[charsType][4].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||            ||
-5 ||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||____________||
-  |/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/____________\|
-   ____ ____ ____ _______________________________________ ____ ____ ____
-  ||  |||  |||  |||               {[['espace ' if 4 in chars[charsType][6].keys() else '       '][0] if 6 in chars[charsType].keys() else '       '][0]}               |||  |||  |||  ||
-6 ||__|||__|||__|||_____________________________________|||__|||__|||__||
-  |/__\|/__\|/__\|/_____________________________________\|/__\|/__\|/__\|""", [menuAccueil, menuClavier])
+				elif menuClavier.lower() == "afficher les caractères en majuscule":
+					charsType = 'upper'
 
-				if menuClavierAffichage.lower() == "quitter":
-					sys.exit(0)
+				elif menuClavier.lower() == "afficher les caractères en altgr":
+					charsType = 'altgr'
 
-	elif menuAccueil.lower() == "notice d'utilisation":
-		pass
+				elif menuClavier.lower() == "quitter":
+					exit()
+
+				if "Afficher les caractères en" in menuClavier:
+					menuClavierAffichage = menu([], f"""     ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ 
+|   ||{[[chars[charsType][2][1] if 1 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][2] if 2 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][3] if 3 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][4] if 4 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][5] if 5 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][6] if 6 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][7] if 7 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][8] if 8 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][9] if 9 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][10] if 10 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][11] if 11 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][12] if 12 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][2][13] if 13 in chars[charsType][2].keys() else ' '][0] if 2 in chars[charsType].keys() else ' '][0]} ||
+| 2 ||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__||
+|   |/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
+|    _______ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____
+|   ||{[['tab' if 1 in chars[charsType][3].keys() else '   '][0] if 3 in chars[charsType].keys() else '   '][0]}  |||{[[chars[charsType][3][2] if 2 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][3] if 3 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][4] if 4 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][5] if 5 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][6] if 6 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][7] if 7 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][8] if 8 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][9] if 9 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][10] if 10 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][11] if 11 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][12] if 12 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][3][13] if 13 in chars[charsType][3].keys() else ' '][0] if 3 in chars[charsType].keys() else ' '][0]} ||
+| 3 ||_____|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__||
+|   |/_____\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
+|    _________ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____
+|   ||       |||{[[chars[charsType][4][2] if 2 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][3] if 3 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][4] if 4 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][5] if 5 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][6] if 6 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][7] if 7 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][8] if 8 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][9] if 9 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][10] if 10 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][11] if 11 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][12] if 12 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][4][13] if 13 in chars[charsType][4].keys() else ' '][0] if 4 in chars[charsType].keys() else ' '][0]} ||
+| 4 ||_______|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__||
+|   |/_______\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
+|    ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ____ ______________ 
+|   ||  |||{[[chars[charsType][5][2] if 2 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][3] if 3 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][4] if 4 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][5] if 5 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][6] if 6 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][7] if 7 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][8] if 8 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][9] if 9 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][10] if 10 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][11] if 11 in chars[charsType][5].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||{[[chars[charsType][5][12] if 12 in chars[charsType][4].keys() else ' '][0] if 5 in chars[charsType].keys() else ' '][0]} |||            ||
+| 5 ||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||__|||____________||
+|   |/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/____________\|
+|    ____ ____ ____ _______________________________________ ____ ____ ____
+|   ||  |||  |||  |||               {[['espace ' if 4 in chars[charsType][6].keys() else '       '][0] if 6 in chars[charsType].keys() else '       '][0]}               |||  |||  |||  ||
+| 6 ||__|||__|||__|||_____________________________________|||__|||__|||__||
+|   |/__\|/__\|/__\|/_____________________________________\|/__\|/__\|/__\|""", [menuAccueil, menuClavier])
+
+					if menuClavierAffichage.lower() == "quitter":
+						exit()
+
+		elif menuAccueil.lower() == "notice d'utilisation":
+			pass
+
+except (EOFError, KeyboardInterrupt):
+	exit()
