@@ -99,7 +99,7 @@ def convertCode(language, lines):
 		if language == "python":
 
 			newLine = ''
-			if lines[lineIndex]:
+			if lines[lineIndex].replace('\n', ''):
 				decomposedLine = {"instruction" : None, "comment" : None}
 
 				if len(lines[lineIndex][::-1].replace('~~', 'afl855dh2qlhh12g15dg145d7'[::-1], 1)[::-1].split('afl855dh2qlhh12g15dg145d7')) == 2:
@@ -122,7 +122,7 @@ def convertCode(language, lines):
 
 				charsVerifier = [i for i in lines[lineIndex][::-1].replace('~~', 'afl855dh2qlhh12g15dg145d7'[::-1], 1)[::-1].split('afl855dh2qlhh12g15dg145d7')[0].split('~') if i and i != '¤']
 
-				for char in string.printable.replace('}', '').replace('¤', '').replace('~', ''):
+				for char in string.printable.replace('}', '').replace('¤', '').replace('~', '').replace('\n', ''):
 					for charToVerifyIndex in range(len(charsVerifier)):
 						if char in charsVerifier[charToVerifyIndex]:
 							raise UnauthorizedSymbolError(char, lineIndex + 1, {'iteration' : charToVerifyIndex + 1, 'value' : charsVerifier[charToVerifyIndex]}, '!!! FILE NAME IN CONTEXT !!!')
@@ -222,7 +222,7 @@ def interpretSuis():
 	pynput.keyboard.Controller().press(pynput.keyboard.Key.enter)
 	while output.strip():
 		output = input()
-		pynput.keyboard.Controller().type(convertCode('python', [output])[0])
+		pynput.keyboard.Controller().type("\n" + convertCode('python', [output])[0])
 		time.sleep(0.3)
 		pynput.keyboard.Controller().press(pynput.keyboard.Key.enter)
 
