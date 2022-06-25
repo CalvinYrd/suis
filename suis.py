@@ -1,14 +1,6 @@
 from tkinter import filedialog
 import os, colorama, sys, shutil, string, msvcrt, pynput, threading, time
 
-class UnauthorizedSymbolError(Exception):
-	def __init__(self, character, line, _set, file):
-		super().__init__(f"The \"{character}\" character is not allowed to be used in this context at line {str(line)} on set n°{str(_set['iteration'])} containing \"{_set['value']}\" in file : {file}, you can only use these three characters : {'}'} , ¤ , ~. Except you are writing a comment, in which case you can use any character.")
-
-class UnknownCharacterError(Exception):
-	def __init__(self, y, x, type, line, _set, file):
-		super().__init__(f"There is no character at position {y}:{x} of type \"{type}\" at line {str(line)} on set n°{str(_set['iteration'])} containing \"{_set['value']}\" in file : {file}. Please check the keyboard on the home menu.")
-
 if os.name == 'nt':
 	def clear():
 		os.system('cls')
@@ -92,15 +84,18 @@ def menu(choices = [], title="", previousChoices=[]):
 
 				return selection
 
-def convertCode(language, lines):
+def convertCode(language, lines, fileName = None):
 	newLines = []
+	currentLineIteration = 0
 
 	for lineIndex in range(len(lines)):
 		if language == "python":
 
 			newLine = ''
+
 			if lines[lineIndex].replace('\n', ''):
 				decomposedLine = {"instruction" : None, "comment" : None}
+				currentLineIteration += 1
 
 				if len(lines[lineIndex][::-1].replace('~~', 'afl855dh2qlhh12g15dg145d7'[::-1], 1)[::-1].split('afl855dh2qlhh12g15dg145d7')) == 2:
 
@@ -125,7 +120,14 @@ def convertCode(language, lines):
 				for char in string.printable.replace('}', '').replace('¤', '').replace('~', '').replace('\n', ''):
 					for charToVerifyIndex in range(len(charsVerifier)):
 						if char in charsVerifier[charToVerifyIndex]:
-							raise UnauthorizedSymbolError(char, lineIndex + 1, {'iteration' : charToVerifyIndex + 1, 'value' : charsVerifier[charToVerifyIndex]}, '!!! FILE NAME IN CONTEXT !!!')
+
+							if fileName:
+								print(f"The {colorama.Fore.RED}\"{char}\"{colorama.Fore.BLACK} character is not allowed to be used in this context at line {colorama.Fore.GREEN}{str(currentLineIteration)}{colorama.Fore.BLACK} on set n°{colorama.Fore.GREEN}{str(charToVerifyIndex + 1)}{colorama.Fore.BLACK} containing \"{charsVerifier[charToVerifyIndex].replace(char, f'{colorama.Fore.RED}{char}{colorama.Fore.BLACK}', 1)}\" in file : {colorama.Fore.BLUE}{fileName}{colorama.Fore.BLACK}.\nyou can only use these three characters : {'}'} , ¤ , ~. Except you are writing a comment.\nin which case you can use any character.")
+
+							else:
+								print(f"The {colorama.Fore.RED}\"{char}\"{colorama.Fore.BLACK} character is not allowed to be used in this context at line {colorama.Fore.GREEN}{str(currentLineIteration)}{colorama.Fore.BLACK} on set n°{colorama.Fore.GREEN}{str(charToVerifyIndex + 1)}{colorama.Fore.BLACK} containing \"{charsVerifier[charToVerifyIndex].replace(char, f'{colorama.Fore.RED}{char}{colorama.Fore.BLACK}', 1)}\".\nyou can only use these three characters : {'}'} , ¤ , ~. Except you are writing a comment.\nin which case you can use any character.")
+
+							return
 
 				characters = decomposedLine['instruction'].split('~')[:-1]
 				currentSetIteration = 0
@@ -172,34 +174,45 @@ def convertCode(language, lines):
 						else:
 							characterSchema.append(1)
 
+						if fileName:
+							unAllowedCharacterErrorMessage = f"There is no character at position {colorama.Fore.RED}{characterSchema[0]}:{characterSchema[1]}{colorama.Fore.BLACK} in this context at line {colorama.Fore.GREEN}{str(currentLineIteration)}{colorama.Fore.BLACK} on set n°{colorama.Fore.GREEN}{str(currentSetIteration)}{colorama.Fore.BLACK} containing {colorama.Fore.RED}\"{characters[characterIndex]}\"{colorama.Fore.BLACK} in file : {colorama.Fore.BLUE}{fileName}{colorama.Fore.BLACK}.\nTake a look at the keyboard at home for more."
+
+						else:
+							unAllowedCharacterErrorMessage = f"There is no character at position {colorama.Fore.RED}{characterSchema[0]}:{characterSchema[1]}{colorama.Fore.BLACK} in this context at line {colorama.Fore.GREEN}{str(currentLineIteration)}{colorama.Fore.BLACK} on set n°{colorama.Fore.GREEN}{str(currentSetIteration)}{colorama.Fore.BLACK} containing {colorama.Fore.RED}\"{characters[characterIndex]}\"{colorama.Fore.BLACK}.\nTake a look at the keyboard at home for more."
+
 						try:
 							if characters[characterIndex + 1] == '¤':
 								try:
 									newLine += characterSchema[2] * chars['altgr'][characterSchema[0]][characterSchema[1]]
 
 								except KeyError:
-									raise UnknownCharacterError(characterSchema[0], characterSchema[1], 'altgr', lineIndex + 1, {'iteration' : currentSetIteration, 'value' : characters[characterIndex]}, '!!! FILE NAME IN CONTEXT !!!')
+									print(unAllowedCharacterErrorMessage)
+									return
 
 							elif not characters[characterIndex + 1]:
 								try:
 									newLine += characterSchema[2] * chars['upper'][characterSchema[0]][characterSchema[1]]
 
 								except KeyError:
-									raise UnknownCharacterError(characterSchema[0], characterSchema[1], 'upper', lineIndex + 1, {'iteration' : currentSetIteration, 'value' : characters[characterIndex]}, '!!! FILE NAME IN CONTEXT !!!')
+									print(unAllowedCharacterErrorMessage)
+									return
+
 
 							else:
 								try:
 									newLine += characterSchema[2] * chars['lower'][characterSchema[0]][characterSchema[1]]
 
 								except KeyError:
-									raise UnknownCharacterError(characterSchema[0], characterSchema[1], 'lower', lineIndex + 1, {'iteration' : currentSetIteration, 'value' : characters[characterIndex]}, '!!! FILE NAME IN CONTEXT !!!')
+									print(unAllowedCharacterErrorMessage)
+									return
 
 						except IndexError:
 							try:
 								newLine += characterSchema[2] * chars['lower'][characterSchema[0]][characterSchema[1]]
 							
 							except KeyError:
-								raise UnknownCharacterError(characterSchema[0], characterSchema[1], 'lower', lineIndex + 1, {'iteration' : characterIndex + 1, 'value' : characters[characterIndex]}, '!!! FILE NAME IN CONTEXT !!!')
+								print(unAllowedCharacterErrorMessage)
+								return
 
 				if decomposedLine['comment']:
 					newLine += f" #{decomposedLine['comment']}"
@@ -222,7 +235,15 @@ def interpretSuis():
 	pynput.keyboard.Controller().press(pynput.keyboard.Key.enter)
 	while output.strip():
 		output = input()
-		pynput.keyboard.Controller().type("\n" + convertCode('python', [output])[0])
+
+		code = convertCode('python', [output])
+
+		if code:
+			pynput.keyboard.Controller().type("\n" + code[0])
+
+		else:
+			pynput.keyboard.Controller().type("\n")
+
 		time.sleep(0.3)
 		pynput.keyboard.Controller().press(pynput.keyboard.Key.enter)
 
@@ -304,15 +325,24 @@ try:
 						path = path.name
 
 						with open(path, "r", encoding = "utf-8") as sourceFile:
-							with open("__exectempfile__.py", "w", encoding = "utf-8") as targetFile:
-								for line in convertCode("python", sourceFile.readlines()):
-									targetFile.write(line)
+							clear()
+							code = convertCode("python", sourceFile.readlines(), path)
+
+							if code:
+								with open("__exectempfile__.py", "w", encoding = "utf-8") as targetFile:
+									for line in code:
+										targetFile.write(line)
+
+							else:
+								print(f'\n### Appuyez sur une touche pour continuer ###')
+								msvcrt.getch()
 
 						clear()
-						os.system('py __exectempfile__.py')
-						os.remove("__exectempfile__.py")
-						print(f'\n### Appuyez sur une touche pour continuer ###')
-						msvcrt.getch()
+						if code:
+							os.system('py __exectempfile__.py')
+							os.remove("__exectempfile__.py")
+							print(f'\n### Appuyez sur une touche pour continuer ###')
+							msvcrt.getch()
 
 				elif "interpreter un dossier" in menuInterprete.lower():
 					path = filedialog.askdirectory()
@@ -334,8 +364,19 @@ try:
 								os.rename(f"__exectempdir__/{file}", f"__exectempdir__/{file.replace('.suis', '.py')}")
 
 								with open(f"{path}/{file}", 'r', encoding = "utf-8") as sourceFile:
-									with open(f"__exectempdir__/{file.replace('.suis', '.py')}", "w", encoding = "utf-8") as targetFile:
-										targetFile.writelines(convertCode("python", sourceFile.readlines()))
+									print()
+									code = convertCode("python", sourceFile.readlines(), f"{path}/{file}")
+
+									if code:
+										with open(f"__exectempdir__/{file.replace('.suis', '.py')}", "w", encoding = "utf-8") as targetFile:
+											targetFile.writelines(code)
+
+									else:
+										with open(f"__exectempdir__/{file.replace('.suis', '.py')}", "w", encoding = "utf-8") as targetFile:
+											targetFile.writelines("print('Fichier inexecutable, ce dernier contient une erreur.')")
+
+										print(f'\n### Appuyez sur une touche pour continuer ###')
+										msvcrt.getch()
 
 						menuInterpreteDossier = menu([i for i in os.listdir("__exectempdir__") if i.endswith(".py")], homeTitle, [menuAccueil, menuInterprete])
 
@@ -351,7 +392,7 @@ try:
 							msvcrt.getch()
 
 						else:
-							shutil.rmtree("__exectempdir__")
+							shutil.rmtree("__exectempdir__")	
 
 				elif "interpreter en temps" in menuInterprete.lower():
 
