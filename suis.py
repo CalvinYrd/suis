@@ -26,9 +26,12 @@ def menu(choices = [], title="", previousChoices=[]):
 
 	output, tallestLength = "", 0
 
-	for choice in choices:
-		if (len(choice) > tallestLength):
-			tallestLength = len(choice)
+	for choiceIndex in range(len(choices)):
+		if (len(choices[choiceIndex]) > tallestLength):
+			tallestLength = len(choices[choiceIndex])
+
+		if choices[choiceIndex]:
+			choices[choiceIndex] = choices[choiceIndex][0].upper() + choices[choiceIndex][1:]
 
 	while 'ok' not in output.lower().strip():
 		for selection in choices:
@@ -222,6 +225,35 @@ def convertCode(language, lines, fileName = None):
 
 			newLines.append(newLine)
 
+		elif language == "suis":
+			newLine = ""
+
+			for char in lines[lineIndex]:
+				for charType in ("lower", "upper", "altgr"):
+
+					for charsListIndex in chars[charType]:				
+						for _char in chars[charType][charsListIndex]:
+
+							if chars[charType][charsListIndex][_char] == char:
+								char = {"line" : charsListIndex, "column" : _char, "type" : None}
+
+								if charType == "lower":
+									char["type"] = "~"
+
+								elif charType == "upper":
+									char["type"] = "~~"
+
+								elif charType == "altgr":
+									char["type"] = "~¤~"
+
+								if char["column"] >= 10:
+									newLine += f"{char['line'] * '}'}¤{int(str(char['column'])[0]) * '}'}¤¤{int(str(char['column'])[1]) * '}'}{char['type']}"
+
+								else:
+									newLine += f"{char['line'] * '}'}¤{char['column'] * '}'}{char['type']}"
+
+			newLines.append(newLine)
+
 	return newLines
 
 def launchPythonInterpreter():
@@ -331,10 +363,14 @@ try:
 							if code:
 								with open("__exectempfile__.py", "w", encoding = "utf-8") as targetFile:
 									for line in code:
-										targetFile.write(line)
+										if line.strip('\n'):
+											targetFile.write(line + "\n")
+
+										else:
+											targetFile.write("\n")
 
 							else:
-								print(f'\n### Appuyez sur une touche pour continuer ###')
+								print('\n### Appuyez sur une touche pour continuer ###')
 								msvcrt.getch()
 
 						clear()
@@ -404,15 +440,110 @@ try:
 					interpretSuis()
 
 		elif menuAccueil.lower() == "convertir":
-			pass
-			# convertir en suis
-			# convertir en python
-				# convertir un fichier
-				# convertir un dossier
-				# convertir en direct
-					# afficher
-					# enregistrer
-					# afficher et enregistrer
+			menuConvertir = ""
+
+			while "retour" not in menuConvertir.lower():
+				menuConvertir = menu(["Convertir en suis", "Convertir en python / littéraire"], homeTitle, [menuAccueil])
+
+				if "quitter" in menuConvertir.lower():
+					exit()
+
+				elif "convertir" in menuConvertir.lower() and ("python" in menuConvertir.lower() or "suis" in menuConvertir.lower()):
+
+					if "python" in menuConvertir.lower():
+						langageConversion = "suis"
+
+					elif "suis" in menuConvertir.lower():
+						langageConversion = "python"
+
+					menuConvertir2 = ""
+
+					while "retour" not in menuConvertir2.lower():
+						menuConvertir2 = menu(["Convertir un fichier", "Convertir du texte"], homeTitle, [menuAccueil, menuConvertir])
+
+						if "quitter" in menuConvertir2.lower():
+							exit()
+
+						elif "fichier" in menuConvertir2.lower() or "texte" in menuConvertir2.lower():
+							result = None
+
+							if langageConversion == "suis":
+									langageConversionExt, langageConversionResultat, langageConversionResultatExt = "suis", "python", "py"
+
+							elif langageConversion == "python":
+								langageConversionExt, langageConversionResultat, langageConversionResultatExt = "py", "suis", "suis"
+
+							if "fichier" in menuConvertir2.lower():
+
+								path = filedialog.askopenfile(filetypes = (("Fichiers python", f"*.{langageConversionExt}"), ("Tous les fichiers", "*.*")))
+
+								if path and path.name.endswith(f".{langageConversionExt}"):
+									path = path.name
+
+									with open(path, 'r', encoding = "utf-8") as file:
+										result = convertCode(langageConversionResultat, file.readlines(), path)
+
+							elif "texte" in menuConvertir2.lower():
+								clear()
+								result = convertCode(langageConversionResultat, [input("Saisissez le contenu à convertir :\n> ")])
+
+							if result:
+								menuConvertir3 = ""
+
+								while "retour" not in menuConvertir3.lower():
+									menuConvertir3 = menu(["afficher", "enregistrer", [i if 'fichier' in menuConvertir2.lower() else '' for i in ['écraser']][0]], homeTitle, [menuAccueil, menuConvertir, menuConvertir2])
+
+									if "quitter" in menuConvertir3.lower():
+										exit()
+
+									elif "afficher" in menuConvertir3.lower():
+										clear()
+										
+										for line in result:
+											if line.strip('\n'):
+												print(line)
+
+											else:
+												print()
+
+										print(f'\n### Appuyez sur une touche pour continuer ###')
+										msvcrt.getch()
+
+									elif "enregistrer" in menuConvertir3.lower():
+										savePath = filedialog.asksaveasfile(defaultextension = f".{langageConversionResultatExt}")
+
+										if savePath:
+											with open(savePath.name, "w", encoding = "utf-8") as file:
+												for line in result:
+													if line.strip('\n'):
+														file.write(line + "\n")
+
+													else:
+														file.write("\n")
+
+											clear()
+											print(f'\n### Fichier créé. Appuyez sur une touche pour continuer ###')
+											msvcrt.getch()
+
+										else:
+											clear()
+											print(f'\n### Echec de création du fichier. Appuyez sur une touche pour continuer ###')
+											msvcrt.getch()
+
+									elif "écraser" in menuConvertir3.lower():
+										os.remove(path)
+
+										with open(path[::-1].replace(f'.{path[::-1].split(".", 1)[0][::-1]}'[::-1], f".{langageConversionResultatExt}"[::-1], 1)[::-1], "w", encoding = "utf-8") as file:
+											for line in result:
+												if line.strip('\n'):
+													file.write(line + "\n")
+
+												else:
+													file.write("\n")
+
+										clear()
+										print(f'\n### Fichier écrasé. Appuyez sur une ouche pour continuer ###')
+										msvcrt.getch()
 
 		elif menuAccueil.lower() == "afficher le clavier":
 			menuClavier = ""
@@ -457,7 +588,9 @@ try:
 						exit()
 
 		elif menuAccueil.lower() == "notice d'utilisation":
-			pass
+			clear()
+			print("\n### En raison de la fainéantise du développeur ayant conçu ce programme, la section suivante n'as pas encore été conçue. Appuyez sur une touche pour continuer ###")
+			msvcrt.getch()
 
 except (EOFError, KeyboardInterrupt):
 	exit()
