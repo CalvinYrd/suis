@@ -1,19 +1,44 @@
-from tkinter import filedialog
-import os, colorama, sys, shutil, string, msvcrt, pynput, threading, time
+from os import name as os_name
+from os import system as os_system
+from os import remove as os_remove
+from os import listdir as os_listdir
+from os import rename as os_rename
 
-if os.name == 'nt':
+from os.path import isfile as os_path_isfile
+from os.path import join as os_path_join
+from os.path import exists as os_path_exists
+from os.path import isdir as os_path_isdir
+
+from colorama import Fore as colorama_Fore
+from colorama import Back as colorama_Back
+from colorama import Style as colorama_Style
+
+from shutil import rmtree as shutil_rmtree
+from shutil import copytree as shutil_copytree
+
+from pynput.keyboard import Controller as pynput_keyboard_Controller
+from pynput.keyboard import Key as pynput_keyboard_Key
+
+from sys import exit as sys_exit
+from string import printable as string_printable
+from msvcrt import getch as msvcrt_getch
+from threading import Thread as threading_Thread
+from time import sleep as time_sleep
+from tkinter import filedialog as tkinter_filedialog
+
+if os_name == 'nt':
 	def clear():
-		os.system('cls')
+		os_system('cls')
 
 else:
 	def clear():
-		os.system('clear')
+		os_system('clear')
 
 clear()
 
 def menu(choices = [], title="", previousChoices=[]):
 	if title:
-		title = f'\n{title}\n{colorama.Fore.GREEN}\nFaites <Entrer> pour naviguer entre les différentes options.\nFaites "ok" pour confirmer votre choix.{colorama.Fore.BLACK}\n'
+		title = f'\n{title}\n{colorama_Fore.GREEN}\nFaites <Entrer> pour naviguer entre les différentes options.\nFaites "ok" pour confirmer votre choix.{colorama_Fore.BLACK}\n'
 
 	if previousChoices:
 		choices.append("")
@@ -38,36 +63,36 @@ def menu(choices = [], title="", previousChoices=[]):
 			if not selection:
 				continue
 
-			print(colorama.Back.LIGHTWHITE_EX + colorama.Fore.BLACK)
+			print(colorama_Back.LIGHTWHITE_EX + colorama_Fore.BLACK)
 			clear()
 
-			if os.name == "nt":
+			if os_name == "nt":
 				if previousChoices:
 					if selection.startswith("Retourner vers : "):
-						os.system(f'title "Suis v0.0.1 ◦ By CalvinYrd : {" > ".join(previousChoices)}"')
+						os_system(f'title "Suis v0.0.1 ◦ By CalvinYrd : {" > ".join(previousChoices)}"')
 
 					else:
-						os.system(f'title "Suis v0.0.1 ◦ By CalvinYrd : {" > ".join(previousChoices)} > {selection}"')
+						os_system(f'title "Suis v0.0.1 ◦ By CalvinYrd : {" > ".join(previousChoices)} > {selection}"')
 
 				else:
-					os.system(f'title "Suis v0.0.1 ◦ By CalvinYrd : {selection}"')
+					os_system(f'title "Suis v0.0.1 ◦ By CalvinYrd : {selection}"')
 
 			for line in title.split("\n"):
 				print(f"   {line}")
 
 			if previousChoices:
 				if selection.startswith("Retourner vers : "):
-					print(f'   {colorama.Fore.BLUE}{" > ".join(previousChoices)}{colorama.Fore.BLACK}\n')
+					print(f'   {colorama_Fore.BLUE}{" > ".join(previousChoices)}{colorama_Fore.BLACK}\n')
 
 				else:
-					print(f'   {colorama.Fore.BLUE}{" > ".join(previousChoices)} > {selection}{colorama.Fore.BLACK}\n')
+					print(f'   {colorama_Fore.BLUE}{" > ".join(previousChoices)} > {selection}{colorama_Fore.BLACK}\n')
 
 			else:
-				print(f'   {colorama.Fore.BLUE}{selection}{colorama.Fore.BLACK}\n')
+				print(f'   {colorama_Fore.BLUE}{selection}{colorama_Fore.BLACK}\n')
 
 			for choice in choices:
 				if choice == selection:
-					print(f"   {colorama.Back.LIGHTGREEN_EX}* {choice}{int((tallestLength - len(choice))) * ' '} {colorama.Back.LIGHTWHITE_EX}")
+					print(f"   {colorama_Back.LIGHTGREEN_EX}* {choice}{int((tallestLength - len(choice))) * ' '} {colorama_Back.LIGHTWHITE_EX}")
 
 				else:
 					if choice:
@@ -78,11 +103,11 @@ def menu(choices = [], title="", previousChoices=[]):
 
 			output = input("\n> ")
 			if 'ok' in output.lower().strip() and selection:
-				if os.name == "nt":
-					os.system('title "Suis 0.0.1 | By CalvinYrd"')
+				if os_name == "nt":
+					os_system('title "Suis 0.0.1 | By CalvinYrd"')
 
 				if selection.lower() == "quitter" or selection.lower() == "quit" or selection.lower() == "exit" or selection.lower() == "q":
-					print(colorama.Style.RESET_ALL)
+					print(colorama_Style.RESET_ALL)
 					clear()
 
 				return selection
@@ -103,7 +128,7 @@ def convertCode(language, lines, fileName = None):
 				if len(lines[lineIndex][::-1].replace('~~', 'afl855dh2qlhh12g15dg145d7'[::-1], 1)[::-1].split('afl855dh2qlhh12g15dg145d7')) == 2:
 
 					commentExists = lines[lineIndex]
-					for c in string.printable.replace('}', '').replace('¤', '').replace('~', ''):
+					for c in string_printable.replace('}', '').replace('¤', '').replace('~', ''):
 						commentExists = commentExists.replace(c, '')
 
 					if commentExists.endswith('~~~'):
@@ -120,15 +145,15 @@ def convertCode(language, lines, fileName = None):
 
 				charsVerifier = [i for i in lines[lineIndex][::-1].replace('~~', 'afl855dh2qlhh12g15dg145d7'[::-1], 1)[::-1].split('afl855dh2qlhh12g15dg145d7')[0].split('~') if i and i != '¤']
 
-				for char in string.printable.replace('}', '').replace('¤', '').replace('~', '').replace('\n', ''):
+				for char in string_printable.replace('}', '').replace('¤', '').replace('~', '').replace('\n', ''):
 					for charToVerifyIndex in range(len(charsVerifier)):
 						if char in charsVerifier[charToVerifyIndex]:
 
 							if fileName:
-								print(f"The {colorama.Fore.RED}\"{char}\"{colorama.Fore.BLACK} character is not allowed to be used in this context at line {colorama.Fore.GREEN}{str(currentLineIteration)}{colorama.Fore.BLACK} on set n°{colorama.Fore.GREEN}{str(charToVerifyIndex + 1)}{colorama.Fore.BLACK} containing \"{charsVerifier[charToVerifyIndex].replace(char, f'{colorama.Fore.RED}{char}{colorama.Fore.BLACK}', 1)}\" in file : {colorama.Fore.BLUE}{fileName}{colorama.Fore.BLACK}.\nyou can only use these three characters : {'}'} , ¤ , ~. Except you are writing a comment.\nin which case you can use any character.")
+								print(f"The {colorama_Fore.RED}\"{char}\"{colorama_Fore.BLACK} character is not allowed to be used in this context at line {colorama_Fore.GREEN}{str(currentLineIteration)}{colorama_Fore.BLACK} on set n°{colorama_Fore.GREEN}{str(charToVerifyIndex + 1)}{colorama_Fore.BLACK} containing \"{charsVerifier[charToVerifyIndex].replace(char, f'{colorama_Fore.RED}{char}{colorama_Fore.BLACK}', 1)}\" in file : {colorama_Fore.BLUE}{fileName}{colorama_Fore.BLACK}.\nyou can only use these three characters : {'}'} , ¤ , ~. Except you are writing a comment.\nin which case you can use any character.")
 
 							else:
-								print(f"The {colorama.Fore.RED}\"{char}\"{colorama.Fore.BLACK} character is not allowed to be used in this context at line {colorama.Fore.GREEN}{str(currentLineIteration)}{colorama.Fore.BLACK} on set n°{colorama.Fore.GREEN}{str(charToVerifyIndex + 1)}{colorama.Fore.BLACK} containing \"{charsVerifier[charToVerifyIndex].replace(char, f'{colorama.Fore.RED}{char}{colorama.Fore.BLACK}', 1)}\".\nyou can only use these three characters : {'}'} , ¤ , ~. Except you are writing a comment.\nin which case you can use any character.")
+								print(f"The {colorama_Fore.RED}\"{char}\"{colorama_Fore.BLACK} character is not allowed to be used in this context at line {colorama_Fore.GREEN}{str(currentLineIteration)}{colorama_Fore.BLACK} on set n°{colorama_Fore.GREEN}{str(charToVerifyIndex + 1)}{colorama_Fore.BLACK} containing \"{charsVerifier[charToVerifyIndex].replace(char, f'{colorama_Fore.RED}{char}{colorama_Fore.BLACK}', 1)}\".\nyou can only use these three characters : {'}'} , ¤ , ~. Except you are writing a comment.\nin which case you can use any character.")
 
 							return
 
@@ -178,10 +203,10 @@ def convertCode(language, lines, fileName = None):
 							characterSchema.append(1)
 
 						if fileName:
-							unAllowedCharacterErrorMessage = f"There is no character at position {colorama.Fore.RED}{characterSchema[0]}:{characterSchema[1]}{colorama.Fore.BLACK} in this context at line {colorama.Fore.GREEN}{str(currentLineIteration)}{colorama.Fore.BLACK} on set n°{colorama.Fore.GREEN}{str(currentSetIteration)}{colorama.Fore.BLACK} containing {colorama.Fore.RED}\"{characters[characterIndex]}\"{colorama.Fore.BLACK} in file : {colorama.Fore.BLUE}{fileName}{colorama.Fore.BLACK}.\nTake a look at the keyboard at home for more."
+							unAllowedCharacterErrorMessage = f"There is no character at position {colorama_Fore.RED}{characterSchema[0]}:{characterSchema[1]}{colorama_Fore.BLACK} in this context at line {colorama_Fore.GREEN}{str(currentLineIteration)}{colorama_Fore.BLACK} on set n°{colorama_Fore.GREEN}{str(currentSetIteration)}{colorama_Fore.BLACK} containing {colorama_Fore.RED}\"{characters[characterIndex]}\"{colorama_Fore.BLACK} in file : {colorama_Fore.BLUE}{fileName}{colorama_Fore.BLACK}.\nTake a look at the keyboard at home for more."
 
 						else:
-							unAllowedCharacterErrorMessage = f"There is no character at position {colorama.Fore.RED}{characterSchema[0]}:{characterSchema[1]}{colorama.Fore.BLACK} in this context at line {colorama.Fore.GREEN}{str(currentLineIteration)}{colorama.Fore.BLACK} on set n°{colorama.Fore.GREEN}{str(currentSetIteration)}{colorama.Fore.BLACK} containing {colorama.Fore.RED}\"{characters[characterIndex]}\"{colorama.Fore.BLACK}.\nTake a look at the keyboard at home for more."
+							unAllowedCharacterErrorMessage = f"There is no character at position {colorama_Fore.RED}{characterSchema[0]}:{characterSchema[1]}{colorama_Fore.BLACK} in this context at line {colorama_Fore.GREEN}{str(currentLineIteration)}{colorama_Fore.BLACK} on set n°{colorama_Fore.GREEN}{str(currentSetIteration)}{colorama_Fore.BLACK} containing {colorama_Fore.RED}\"{characters[characterIndex]}\"{colorama_Fore.BLACK}.\nTake a look at the keyboard at home for more."
 
 						try:
 							if characters[characterIndex + 1] == '¤':
@@ -257,35 +282,35 @@ def convertCode(language, lines, fileName = None):
 	return newLines
 
 def launchPythonInterpreter():
-	os.system('py')
+	os_system('py')
 
 def printSuisDetails():
 	print("Suis 0.0.1\nWrite an empty line to quit.\n>>> ")
 
 def interpretSuis():
 	output = '.'
-	pynput.keyboard.Controller().press(pynput.keyboard.Key.enter)
+	pynput_keyboard_Controller().press(pynput_keyboard_Key.enter)
 	while output.strip():
 		output = input()
 
 		code = convertCode('python', [output])
 
 		if code:
-			pynput.keyboard.Controller().type("\n" + code[0])
+			pynput_keyboard_Controller().type("\n" + code[0])
 
 		else:
-			pynput.keyboard.Controller().type("\n")
+			pynput_keyboard_Controller().type("\n")
 
-		time.sleep(0.3)
-		pynput.keyboard.Controller().press(pynput.keyboard.Key.enter)
+		time_sleep(0.3)
+		pynput_keyboard_Controller().press(pynput_keyboard_Key.enter)
 
-	pynput.keyboard.Controller().type("import sys; sys.exit(0)")
-	pynput.keyboard.Controller().press(pynput.keyboard.Key.enter)
+	pynput_keyboard_Controller().type("import sys; sys.exit(0)")
+	pynput_keyboard_Controller().press(pynput_keyboard_Key.enter)
 
 def exit():
-	print(colorama.Style.RESET_ALL)
+	print(colorama_Style.RESET_ALL)
 	clear()
-	sys.exit(0)
+	sys_exit(0)
 
 try:
 	chars = {
@@ -351,7 +376,7 @@ try:
 					exit()
 
 				elif "interpreter un fichier" in menuInterprete.lower():
-					path = filedialog.askopenfile(filetypes = (("Fichiers suis", "*.suis"), ("Tous les fichiers", "*.*")))
+					path = tkinter_filedialog.askopenfile(filetypes = (("Fichiers suis", "*.suis"), ("Tous les fichiers", "*.*")))
 
 					if path and path.name.endswith(".suis"):
 						path = path.name
@@ -371,33 +396,33 @@ try:
 
 							else:
 								print('\n### Appuyez sur une touche pour continuer ###')
-								msvcrt.getch()
+								msvcrt_getch()
 
 						clear()
 						if code:
-							os.system('py __exectempfile__.py')
-							os.remove("__exectempfile__.py")
+							os_system('py __exectempfile__.py')
+							os_remove("__exectempfile__.py")
 							print(f'\n### Appuyez sur une touche pour continuer ###')
-							msvcrt.getch()
+							msvcrt_getch()
 
 				elif "interpreter un dossier" in menuInterprete.lower():
-					path = filedialog.askdirectory()
+					path = tkinter_filedialog.askdirectory()
 
 					if path:
 						files = []
 
-						for file in os.listdir(path):
-							if os.path.isfile(os.path.join(path, file)):
+						for file in os_listdir(path):
+							if os_path_isfile(os_path_join(path, file)):
 								files.append(file)
 
-						if os.path.exists("__exectempdir__") and os.path.isdir("__exectempdir__"):
-							shutil.rmtree("__exectempdir__")
+						if os_path_exists("__exectempdir__") and os_path_isdir("__exectempdir__"):
+							shutil_rmtree("__exectempdir__")
 
-						shutil.copytree(path, "__exectempdir__")
+						shutil_copytree(path, "__exectempdir__")
 
 						for file in files:
 							if file.endswith(".suis"):
-								os.rename(f"__exectempdir__/{file}", f"__exectempdir__/{file.replace('.suis', '.py')}")
+								os_rename(f"__exectempdir__/{file}", f"__exectempdir__/{file.replace('.suis', '.py')}")
 
 								with open(f"{path}/{file}", 'r', encoding = "utf-8") as sourceFile:
 									print()
@@ -412,31 +437,31 @@ try:
 											targetFile.writelines("print('Fichier inexecutable, ce dernier contient une erreur.')")
 
 										print(f'\n### Appuyez sur une touche pour continuer ###')
-										msvcrt.getch()
+										msvcrt_getch()
 
-						menuInterpreteDossier = menu([i for i in os.listdir("__exectempdir__") if i.endswith(".py")], homeTitle, [menuAccueil, menuInterprete])
+						menuInterpreteDossier = menu([i for i in os_listdir("__exectempdir__") if i.endswith(".py")], homeTitle, [menuAccueil, menuInterprete])
 
 						if menuInterpreteDossier.lower() == 'quitter':
-							shutil.rmtree("__exectempdir__")
+							shutil_rmtree("__exectempdir__")
 							exit()
 
 						elif "retourner vers : " not in menuInterpreteDossier.lower():
 							clear()
-							os.system(f"py __exectempdir__/{menuInterpreteDossier}")
-							shutil.rmtree("__exectempdir__")
+							os_system(f"py __exectempdir__/{menuInterpreteDossier}")
+							shutil_rmtree("__exectempdir__")
 							print(f'\n### Appuyez sur une touche pour continuer ###')
-							msvcrt.getch()
+							msvcrt_getch()
 
 						else:
-							shutil.rmtree("__exectempdir__")	
+							shutil_rmtree("__exectempdir__")	
 
 				elif "interpreter en temps" in menuInterprete.lower():
 
-					threading.Thread(target = launchPythonInterpreter).start()
-					time.sleep(0.2)
-					threading.Thread(target = clear).start()
-					time.sleep(0.2)
-					threading.Thread(target = printSuisDetails).start()
+					threading_Thread(target = launchPythonInterpreter).start()
+					time_sleep(0.2)
+					threading_Thread(target = clear).start()
+					time_sleep(0.2)
+					threading_Thread(target = printSuisDetails).start()
 					interpretSuis()
 
 		elif menuAccueil.lower() == "convertir":
@@ -475,7 +500,7 @@ try:
 
 							if "fichier" in menuConvertir2.lower():
 
-								path = filedialog.askopenfile(filetypes = (("Fichiers python", f"*.{langageConversionExt}"), ("Tous les fichiers", "*.*")))
+								path = tkinter_filedialog.askopenfile(filetypes = (("Fichiers python", f"*.{langageConversionExt}"), ("Tous les fichiers", "*.*")))
 
 								if path and path.name.endswith(f".{langageConversionExt}"):
 									path = path.name
@@ -507,10 +532,10 @@ try:
 												print()
 
 										print(f'\n### Appuyez sur une touche pour continuer ###')
-										msvcrt.getch()
+										msvcrt_getch()
 
 									elif "enregistrer" in menuConvertir3.lower():
-										savePath = filedialog.asksaveasfile(defaultextension = f".{langageConversionResultatExt}")
+										savePath = tkinter_filedialog.asksaveasfile(defaultextension = f".{langageConversionResultatExt}")
 
 										if savePath:
 											with open(savePath.name, "w", encoding = "utf-8") as file:
@@ -523,15 +548,15 @@ try:
 
 											clear()
 											print(f'\n### Fichier créé. Appuyez sur une touche pour continuer ###')
-											msvcrt.getch()
+											msvcrt_getch()
 
 										else:
 											clear()
 											print(f'\n### Echec de création du fichier. Appuyez sur une touche pour continuer ###')
-											msvcrt.getch()
+											msvcrt_getch()
 
 									elif "écraser" in menuConvertir3.lower():
-										os.remove(path)
+										os_remove(path)
 
 										with open(path[::-1].replace(f'.{path[::-1].split(".", 1)[0][::-1]}'[::-1], f".{langageConversionResultatExt}"[::-1], 1)[::-1], "w", encoding = "utf-8") as file:
 											for line in result:
@@ -543,7 +568,7 @@ try:
 
 										clear()
 										print(f'\n### Fichier écrasé. Appuyez sur une ouche pour continuer ###')
-										msvcrt.getch()
+										msvcrt_getch()
 
 		elif menuAccueil.lower() == "afficher le clavier":
 			menuClavier = ""
@@ -590,7 +615,7 @@ try:
 		elif menuAccueil.lower() == "notice d'utilisation":
 			clear()
 			print("\n### En raison de la fainéantise du développeur ayant conçu ce programme, la section suivante n'as pas encore été conçue. Appuyez sur une touche pour continuer ###")
-			msvcrt.getch()
+			msvcrt_getch()
 
 except (EOFError, KeyboardInterrupt):
 	exit()
